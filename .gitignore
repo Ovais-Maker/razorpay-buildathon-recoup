@@ -1,0 +1,11 @@
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+*.log
+
+# Run artefacts are regenerable and noisy - except the recorded model
+# decisions, which cost real money and let anyone replay the LLM arm
+# offline with no API key.
+out/*
+!out/decisions.json
