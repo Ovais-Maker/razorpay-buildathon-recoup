@@ -133,17 +133,22 @@ def main() -> None:
         candidates = _pick(ledger.records, args.kind)
         # Prefer a case that recovered *after* a few decisions - a one-message
         # win demonstrates nothing about sequencing or the guardrail.
-        best, best_len = None, -1
+        # Score candidates for how much they actually demonstrate: won by the
+        # agent rather than recovered on its own, shows the guardrail vetoing
+        # something, and is not a trivially small ticket.
+        best, best_score = None, -1e9
         for r in candidates[:600]:
             probe = AuditLedger()
             res = run_case(r, policy, ctx, audit=probe)
-            n = len(probe.for_case(r.case.case_id))
-            score = n + (10 if res.recovered else 0)
-            if score > best_len:
-                best, best_len = r, score
-            if res.recovered and n >= 5:
-                best = r
-                break
+            won = res.recovered and not res.recovered_naturally
+            score = (
+                40 * won
+                + 25 * min(res.n_vetoes, 2)
+                + 3 * len(probe.for_case(r.case.case_id))
+                + min(r.case.amount_paise / 10000, 15)
+            )
+            if score > best_score:
+                best, best_score = r, score
         chosen = [best] if best is not None else candidates[:1]
         if not chosen:
             print("no matching case found")
@@ -152,7 +157,19 @@ def main() -> None:
     audit = AuditLedger()
     result = run_case(chosen[0], policy, ctx, audit=audit)
     render(audit, chosen[0].case.case_id)
-    print(f"outcome: {'RECOVERED ' + _rs(result.recovered_paise) if result.recovered else 'not recovered'}"
+
+    # Distinguish money the agent won from money that was coming back anyway.
+    # Printing "RECOVERED" for a case the agent stopped working, which the
+    # customer then paid on their own, would overstate the result.
+    if result.recovered and result.recovered_naturally:
+        outcome = (f"NOT WON BY THE AGENT - customer paid on their own "
+                   f"({_rs(result.recovered_paise)}, not counted as incremental)")
+    elif result.recovered:
+        outcome = f"RECOVERED {_rs(result.recovered_paise)}"
+    else:
+        outcome = "not recovered"
+
+    print(f"outcome: {outcome}"
           f"   spend {_rs(result.cost_paise)}"
           f"   actions {result.n_actions}   vetoes {result.n_vetoes}"
           f"   stop reason: {result.stop_reason.value if result.stop_reason else '-'}")
