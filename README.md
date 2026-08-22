@@ -89,11 +89,11 @@ python -m pytest tests -q
 
 ```mermaid
 flowchart LR
-    E["event stream"] --> D["Detector<br/><i>what is at risk</i>"]
-    D --> X["Diagnostician<br/><i>why it failed</i>"]
-    X --> S["Strategist<br/><i>heuristic or LLM</i>"]
-    S -- proposes --> G{{"GUARDRAIL<br/>9 compliance rules<br/>pure Python · holds the veto"}}
-    G -- passes --> P["Executor<br/><i>retry · message · escalate</i>"]
+    E["event stream"] --> D["Detector<br/>what is at risk"]
+    D --> X["Diagnostician<br/>why it failed"]
+    X --> S["Strategist<br/>heuristic or LLM"]
+    S -- proposes --> G{{"GUARDRAIL<br/>9 compliance rules<br/>pure Python, holds the veto"}}
+    G -- passes --> P["Executor<br/>retry, message, escalate"]
     G -- vetoes --> S
     P --> A[("Audit ledger<br/>hash-chained")]
     A -. outcome .-> D
