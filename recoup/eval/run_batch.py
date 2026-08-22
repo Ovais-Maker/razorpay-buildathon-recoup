@@ -37,9 +37,9 @@ def run_llm_comparison(ledger, args) -> None:
     n = min(args.llm_cases, len(ledger.records))
     sub = Ledger(records=ledger.records[:n], outages=ledger.outages)
 
-    print("\n" + "=" * 97)
+    print("\n" + "=" * report.MAX_WIDTH)
     print(f"LLM STRATEGIST COMPARISON  -  {n:,} cases, model {args.llm}")
-    print("=" * 97)
+    print("=" * report.MAX_WIDTH)
 
     strategist = LLMStrategist(
         model=args.llm, cache_path=args.llm_cache, offline=args.llm_offline,

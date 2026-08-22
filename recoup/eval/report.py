@@ -8,9 +8,33 @@ it is the single easiest way for a recovery product to look better than it is.
 """
 from __future__ import annotations
 
+import textwrap
 from dataclasses import dataclass
 
 from recoup.eval.runner import ArmResult, CaseResult
+
+MAX_WIDTH = 92
+
+SHORT_ARM = {
+    "B0_do_nothing": "B0 nothing",
+    "B1_fixed_dunning": "B1 dunning",
+    "B2_maximum_pressure": "B2 pressure",
+    "B3_recoup_agent": "B3 agent",
+    "B4_recoup_llm": "B4 llm",
+}
+
+ARM_LEGEND = ("B0 nothing | B1 fixed dunning | B2 max pressure, no guardrail | "
+              "B3 agent | B4 agent+LLM")
+
+
+def _short_arm(arm: str) -> str:
+    """Column headers short enough to fit a laptop terminal.
+
+    The LLM arm carries its model in its name, which alone pushed the table
+    past 170 columns and wrapped it into an unreadable mess.
+    """
+    base = arm.split("[")[0]
+    return SHORT_ARM.get(base, base.replace("_", " ")[:12])
 
 
 @dataclass
@@ -114,7 +138,7 @@ def _rs(paise: int) -> str:
 
 def table(metrics: list[Metrics]) -> str:
     rows = [
-        ("arm", lambda m: m.arm.replace("_", " ")),
+        ("arm", lambda m: _short_arm(m.arm)),
         ("recovered", lambda m: _rs(m.recovered_paise)),
         ("incremental", lambda m: _rs(m.incremental_paise)),
         ("incr. rate", lambda m: f"{m.incremental_rate:6.2%}"),
@@ -128,7 +152,7 @@ def table(metrics: list[Metrics]) -> str:
         ("violations", lambda m: f"{m.n_violations}"),
     ]
     label_w = max(len(label) for label, _ in rows)
-    col_w = max(14, max(len(m.arm.replace("_", " ")) for m in metrics) + 2)
+    col_w = max(12, max(len(_short_arm(m.arm)) for m in metrics) + 2)
 
     lines = []
     for label, fn in rows:
@@ -152,13 +176,14 @@ def headline(metrics: list[Metrics]) -> str:
         (b1.contacts_per_case - agent.contacts_per_case) / b1.contacts_per_case * 100
         if b1.contacts_per_case else 0.0
     )
-    return (
+    return textwrap.fill(
         f"Across {agent.n_cases:,} at-risk cases worth {_rs(agent.at_risk_paise)}, "
         f"the agent recovered {_rs(agent.incremental_paise)} incremental "
         f"({agent.incremental_rate:.1%} of value at risk) - "
         f"{_rs(lift)} more than a standard dunning ladder ({pct:+.0f}%), "
         f"using {contact_delta:.0f}% fewer customer contacts, "
-        f"with {agent.n_violations} compliance violations."
+        f"with {agent.n_violations} compliance violations.",
+        width=MAX_WIDTH,
     )
 
 

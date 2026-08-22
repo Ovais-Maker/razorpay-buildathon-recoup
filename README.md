@@ -238,8 +238,13 @@ is one flag away.
 Recorded decisions persist to `out/decisions.json` and replay for free:
 
 ```bash
-python -m recoup.eval.run_batch --cases 10000 --llm claude-haiku-4-5 --llm-offline
+python -m recoup.eval.run_batch --cases 500 --llm claude-haiku-4-5 --llm-cases 120 --llm-offline
 ```
+
+Use those exact flags — the recorded decisions were captured against that
+ledger, and a different `--cases` produces different cases, so the replay
+would mostly miss. It says so loudly if that happens rather than passing
+fallback output off as the model's.
 
 This reruns the **real model decisions** from a previous run with no API calls
 and no credentials. The run summary reports how many were genuinely replayed

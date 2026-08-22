@@ -83,6 +83,15 @@ class Usage:
                 f"REPLAY of recorded decisions - no API calls, no key required\n"
                 f"  {self.cache_hits:,} real model decisions replayed, "
                 f"{self.cache_misses:,} misses ({miss:.1%} fell back to the heuristic)"
+            ) + (
+                # A mostly-missing replay is the heuristic wearing the LLM's
+                # name. Say so loudly rather than let the column be misread.
+                "\n\n  *** WARNING: this column is NOT a valid LLM result ***\n"
+                f"  {miss:.0%} of decisions came from the fallback policy, not the model.\n"
+                "  The recorded cache was built against one specific ledger. Use:\n"
+                "    --cases 500 --llm claude-haiku-4-5 --llm-cases 120 --llm-offline\n"
+                "  or drop --llm-offline to record fresh decisions for your ledger."
+                if miss > 0.10 else ""
             )
         return (
             f"{self.calls:,} API calls ({self.cache_hits:,} served from the "
