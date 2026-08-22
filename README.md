@@ -87,17 +87,26 @@ python -m pytest tests -q
 
 ## How it works
 
+```mermaid
+flowchart LR
+    E["event stream"] --> D["Detector<br/><i>what is at risk</i>"]
+    D --> X["Diagnostician<br/><i>why it failed</i>"]
+    X --> S["Strategist<br/><i>heuristic or LLM</i>"]
+    S -- proposes --> G{{"GUARDRAIL<br/>9 compliance rules<br/>pure Python · holds the veto"}}
+    G -- passes --> P["Executor<br/><i>retry · message · escalate</i>"]
+    G -- vetoes --> S
+    P --> A[("Audit ledger<br/>hash-chained")]
+    A -. outcome .-> D
+
+    classDef guard fill:#fdece5,stroke:#eb6834,stroke-width:2px,color:#0b0b0b
+    classDef swap fill:#e6f6f0,stroke:#1baf7a,stroke-width:2px,color:#0b0b0b
+    class G guard
+    class S swap
 ```
-event stream
-     |
-     v
- Detector  ──>  Diagnostician  ──>  Strategist  ──>  GUARDRAIL  ──>  Executor
-                                     (policy)      (pure Python,        |
-                                                    has the veto)       v
-                                                                  Audit ledger
-                                                                        |
-                                                       outcome feeds back to state
-```
+
+The **strategist** (green) is the only part that changes when you swap the
+heuristic for an LLM. The **guardrail** (orange) is the only part that can say
+no.
 
 **The strategist proposes; deterministic code disposes.** The strategist can
 propose anything at all — the guardrail is pure Python with veto power, and
