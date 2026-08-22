@@ -88,14 +88,13 @@ python -m pytest tests -q
 ## How it works
 
 ```mermaid
-flowchart LR
-    E["event stream"] --> D["Detector<br/>what is at risk"]
-    D --> X["Diagnostician<br/>why it failed"]
-    X --> S["Strategist<br/>heuristic or LLM"]
-    S -- proposes --> G{{"GUARDRAIL<br/>9 compliance rules<br/>pure Python, holds the veto"}}
+flowchart TB
+    E["event stream"] --> D["Detect and diagnose<br/>what is at risk, and why"]
+    D --> S["Strategist<br/>heuristic or LLM"]
+    S -- proposes --> G{{"GUARDRAIL<br/>9 compliance rules, pure Python"}}
+    G -- vetoes, replan --> S
     G -- passes --> P["Executor<br/>retry, message, escalate"]
-    G -- vetoes --> S
-    P --> A[("Audit ledger<br/>hash-chained")]
+    P --> A[("Audit ledger, hash-chained")]
     A -. outcome .-> D
 
     classDef guard fill:#fdece5,stroke:#eb6834,stroke-width:2px,color:#0b0b0b
