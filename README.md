@@ -76,6 +76,10 @@ python -m recoup.eval.explain_case --kind mandate
 ```
 
 ```bash
+python -m recoup.audit.verify out/audit.jsonl
+```
+
+```bash
 python -m pytest tests -q
 ```
 
