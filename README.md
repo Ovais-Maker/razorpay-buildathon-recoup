@@ -39,6 +39,14 @@ nothing.**
 > nothing" is not counted. Roughly 20% of at-risk value comes back on its own,
 > and counting it is the easiest way for a recovery product to flatter itself.
 
+![Recovery against customer contacts](out/charts/3_contacts_vs_recovery.png)
+
+![Incremental recovery by root cause](out/charts/2_by_root_cause.png)
+
+![Success rate by attempt position](out/charts/1_attempt_decay.png)
+
+Regenerate with `python -m recoup.eval.charts --cases 10000`.
+
 ---
 
 ## The four things this had to prove

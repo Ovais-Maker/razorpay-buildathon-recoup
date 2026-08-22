@@ -9,3 +9,5 @@ __pycache__/
 # offline with no API key.
 out/*
 !out/decisions.json
+!out/charts/
+!out/charts/*.png

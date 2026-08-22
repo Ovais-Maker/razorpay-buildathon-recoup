@@ -65,6 +65,12 @@ class CaseResult:
     promise_made: bool = False
     stop_reason: StopReason | None = None
 
+    # Per-attempt trace, indexed by attempt position. Needed to show how the
+    # return on the Nth action decays - which is what the economic stopping
+    # rule is reacting to.
+    attempt_values: list[int] = field(default_factory=list)
+    attempt_costs: list[int] = field(default_factory=list)
+
 
 @dataclass
 class ArmResult:
@@ -250,6 +256,9 @@ def run_case(
             res.promise_made = True
     else:
         res.stop_reason = StopReason.HORIZON_REACHED
+
+    res.attempt_values = [a.recovered_paise for a in history]
+    res.attempt_costs = [a.cost_paise for a in history]
 
     # A case that never got worked can still recover on its own inside the window.
     if not res.recovered and natural_by(horizon):
